@@ -39,17 +39,33 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var users_controller_1 = require("./users.controller");
 var express_1 = __importDefault(require("express"));
-var users_routes_1 = __importDefault(require("./routes/users/users.routes"));
-var api = (0, express_1.default)();
-// define a route handler for the default home page
-var home = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        res.send('Hello World!');
-        return [2 /*return*/];
-    });
-}); };
-api.get('/', home);
-// get testing route
-api.use('/users', (0, users_routes_1.default)());
-exports.default = api;
+var controller = new users_controller_1.usersController();
+var usersRoutes = function () {
+    var router = express_1.default.Router();
+    // get all users
+    router.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+        var users, err_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, controller.index()];
+                case 1:
+                    users = _a.sent();
+                    res.status(200);
+                    res.json(users);
+                    return [3 /*break*/, 3];
+                case 2:
+                    err_1 = _a.sent();
+                    res.status(400);
+                    res.json('No users found!');
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
+            }
+        });
+    }); });
+    return router;
+};
+exports.default = usersRoutes;

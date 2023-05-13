@@ -1,13 +1,16 @@
 import express, { Request, Response } from 'express';
+import UsersRoutes from './routes/users/users.routes';
 
 const api: express.Application = express();
 
 // define a route handler for the default home page
-const testing = async (req: Request, res: Response) => {
+const home = async (req: Request, res: Response) => {
   res.send('Hello World!');
 };
 
+api.get('/', home);
+
 // get testing route
-api.get('/', testing);
+api.use('/users', UsersRoutes());
 
 export default api;

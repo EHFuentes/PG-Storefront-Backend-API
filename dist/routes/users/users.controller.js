@@ -39,17 +39,38 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var express_1 = __importDefault(require("express"));
-var users_routes_1 = __importDefault(require("./routes/users/users.routes"));
-var api = (0, express_1.default)();
-// define a route handler for the default home page
-var home = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        res.send('Hello World!');
-        return [2 /*return*/];
-    });
-}); };
-api.get('/', home);
-// get testing route
-api.use('/users', (0, users_routes_1.default)());
-exports.default = api;
+exports.usersController = void 0;
+var database_1 = __importDefault(require("../../database"));
+var usersController = /** @class */ (function () {
+    function usersController() {
+    }
+    // Get all users
+    usersController.prototype.index = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var conn, sql, results, err_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
+                        return [4 /*yield*/, database_1.default.connect()];
+                    case 1:
+                        conn = _a.sent();
+                        sql = 'SELECT * FROM users_table';
+                        return [4 /*yield*/, conn.query(sql)];
+                    case 2:
+                        results = _a.sent();
+                        // Close connection
+                        conn.release();
+                        // Return results
+                        return [2 /*return*/, results.rows];
+                    case 3:
+                        err_1 = _a.sent();
+                        throw new Error("Could not get users. Error: ".concat(err_1));
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    return usersController;
+}());
+exports.usersController = usersController;

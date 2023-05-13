@@ -15,7 +15,7 @@ const {
 } = process.env;
 
 let Client: any;
-console.log(ENV);
+console.log('ENV:', ENV);
 
 // if the environment is tests, then we will use the test database
 if (ENV === 'test') {
