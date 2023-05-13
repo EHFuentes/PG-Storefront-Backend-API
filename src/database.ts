@@ -14,7 +14,7 @@ const {
   ENV,
 } = process.env;
 
-let Client: any;
+let Client = new Pool();
 console.log('ENV:', ENV);
 
 // if the environment is tests, then we will use the test database

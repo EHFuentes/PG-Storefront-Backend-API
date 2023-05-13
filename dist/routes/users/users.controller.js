@@ -41,6 +41,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.usersController = void 0;
 var database_1 = __importDefault(require("../../database"));
+var bcrypt_1 = __importDefault(require("bcrypt"));
+var dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
+console.log('dotenv configured');
+// Get the salt rounds from the environment variables
+var _a = process.env, saltRounds = _a.saltRounds, pepper = _a.pepper;
 var usersController = /** @class */ (function () {
     function usersController() {
     }
@@ -67,6 +73,93 @@ var usersController = /** @class */ (function () {
                         err_1 = _a.sent();
                         throw new Error("Could not get users. Error: ".concat(err_1));
                     case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    // Get user by id
+    usersController.prototype.show = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var conn, sql, result, err_2;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
+                        return [4 /*yield*/, database_1.default.connect()];
+                    case 1:
+                        conn = _a.sent();
+                        sql = 'SELECT * FROM users_table WHERE id=($1)';
+                        return [4 /*yield*/, conn.query(sql, [id])];
+                    case 2:
+                        result = _a.sent();
+                        conn.release();
+                        return [2 /*return*/, result.rows[0]];
+                    case 3:
+                        err_2 = _a.sent();
+                        throw new Error("Could not find user ".concat(id, ". Error: ").concat(err_2));
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    // Create new user function to add to database
+    usersController.prototype.create = function (user) {
+        return __awaiter(this, void 0, void 0, function () {
+            var conn, sql, hash, result, createdUser;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, database_1.default.connect()];
+                    case 1:
+                        conn = _a.sent();
+                        console.log('start of create function');
+                        sql = 'INSERT INTO users_table (first_name, last_name, user_password) VALUES($1, $2, $3) RETURNING *';
+                        console.log('sql query created', sql);
+                        hash = bcrypt_1.default.hashSync(user.user_password + pepper, Number(saltRounds));
+                        console.log('hash created', hash);
+                        return [4 /*yield*/, conn.query(sql, [
+                                user.first_name,
+                                user.last_name,
+                                hash,
+                            ])];
+                    case 2:
+                        result = _a.sent();
+                        console.log('result created', result);
+                        createdUser = result.rows[0];
+                        console.log('createdUser created', createdUser);
+                        conn.release();
+                        console.log('end of create function');
+                        return [2 /*return*/, createdUser];
+                }
+            });
+        });
+    };
+    usersController.prototype.authenticate = function (first_name, last_name, user_password) {
+        return __awaiter(this, void 0, void 0, function () {
+            var conn, sql, result, user, hash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, database_1.default.connect()];
+                    case 1:
+                        conn = _a.sent();
+                        sql = 'SELECT user_password FROM users_table WHERE first_name=($1) AND last_name=($2)';
+                        return [4 /*yield*/, conn.query(sql, [first_name, last_name])];
+                    case 2:
+                        result = _a.sent();
+                        // If the user exists, return the user object (without the password) else return null
+                        try {
+                            if (result.rows.length) {
+                                user = result.rows[0];
+                                hash = bcrypt_1.default.hashSync(user_password, Number(saltRounds));
+                                if (bcrypt_1.default.compareSync(user_password, hash)) {
+                                    return [2 /*return*/, user];
+                                }
+                            }
+                            return [2 /*return*/, null];
+                        }
+                        catch (err) {
+                            throw new Error("Could not authenticate user ".concat(first_name, " ").concat(last_name, ". Error: ").concat(err));
+                        }
+                        return [2 /*return*/];
                 }
             });
         });
