@@ -39,21 +39,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var node_http_1 = __importDefault(require("node:http"));
-var dotenv_1 = __importDefault(require("dotenv"));
-var app_1 = __importDefault(require("./app"));
-dotenv_1.default.config();
-var _a = process.env, HOST_ADDRESS = _a.HOST_ADDRESS, PORT = _a.PORT;
-var address = HOST_ADDRESS + ':' + PORT;
-var server = node_http_1.default.createServer(app_1.default);
-function startServer() {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            server.listen(PORT, function () {
-                console.log("Server is running on ".concat(address));
-            });
-            return [2 /*return*/];
-        });
+var express_1 = __importDefault(require("express"));
+var api = (0, express_1.default)();
+// define a route handler for the default home page
+var testing = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        res.send('Hello World!');
+        return [2 /*return*/];
     });
-}
-startServer();
+}); };
+// get testing route
+api.get('/', testing);
+exports.default = api;

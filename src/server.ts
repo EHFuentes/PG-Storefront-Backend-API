@@ -1,23 +1,18 @@
-import express, { Request, Response } from 'express';
-import bodyParser from 'body-parser';
-import helmet from 'helmet';
+import http from 'node:http';
 import dotenv from 'dotenv';
+import app from './app';
 
 dotenv.config();
 
-const { HOST_ADDRESS } = process.env;
+const { HOST_ADDRESS, PORT } = process.env;
 
-const app: express.Application = express();
+const address = HOST_ADDRESS + ':' + PORT;
+const server = http.createServer(app);
 
-const address = HOST_ADDRESS;
+async function startServer() {
+  server.listen(PORT, () => {
+    console.log(`Server is running on ${address}`);
+  });
+}
 
-app.use(helmet());
-app.use(bodyParser.json());
-
-app.get('/', function (req: Request, res: Response) {
-  res.send('Hello World!');
-});
-
-app.listen(3000, function () {
-  console.log(`starting app on: ${address}`);
-});
+startServer();

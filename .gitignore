@@ -1,7 +1,12 @@
+# folders
 node_modules/
+.idea/
 
+# files
 .env
+package-lock.json
 README.md
 REQUIREMENTS.md
-
-.idea/
+database.json
+.prettierrc
+.eslintrc.js
