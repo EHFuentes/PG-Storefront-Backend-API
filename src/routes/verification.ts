@@ -7,21 +7,28 @@ const { TOKEN_SECRET } = process.env;
 
 const verifyAuthToken = (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Get token from request body
-    const token = req.body.token;
+    // Get authorization header from request
+    const authHeader = req.headers.authorization;
 
-    // Decode token using the TOKEN_SECRET from the .env file
-    const decoded = jwt.verify(token, String(TOKEN_SECRET));
+    // Check if authorization header is present
+    if (!authHeader) {
+      return res
+        .status(401)
+        .json({ message: 'Authorization header is missing' });
+    }
+
+    // Check if authorization header is valid
+    const token = authHeader.split(' ')[1];
 
     // Verify token from request body using the TOKEN_SECRET from the .env file
-    jwt.verify(token, String(TOKEN_SECRET));
+    jwt.verify(token, String(TOKEN_SECRET), (err) => {
+      if (err) {
+        return res.status(401).json({ message: 'Invalid token' });
+      }
 
-    // Add decoded token to request body
-    req.body.token = decoded;
-
-    next();
+      next();
+    });
   } catch (error) {
-    // If token is invalid, return 401 status code
     res.status(401).json('Access Denied, not verified');
   }
 };

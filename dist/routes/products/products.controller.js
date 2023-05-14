@@ -39,41 +39,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UsersController = void 0;
+exports.ProductsController = void 0;
 var database_1 = __importDefault(require("../../database"));
-var bcrypt_1 = __importDefault(require("bcrypt"));
-var dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
-// Get the salt rounds from the environment variables
-var _a = process.env, saltRounds = _a.saltRounds, pepper = _a.pepper;
-var UsersController = /** @class */ (function () {
-    function UsersController() {
+var ProductsController = /** @class */ (function () {
+    function ProductsController() {
     }
-    // Get all users
-    UsersController.prototype.index = function () {
+    ProductsController.prototype.index = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var conn, sql, results;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, database_1.default.connect()];
-                    case 1:
-                        conn = _a.sent();
-                        sql = 'SELECT * FROM users_table;';
-                        return [4 /*yield*/, conn.query(sql)];
-                    case 2:
-                        results = _a.sent();
-                        // Close connection
-                        conn.release();
-                        // Return results
-                        return [2 /*return*/, results.rows];
-                }
-            });
-        });
-    };
-    // Get user by id
-    UsersController.prototype.show = function (id) {
-        return __awaiter(this, void 0, void 0, function () {
-            var conn, sql, result, err_1;
+            var conn, sql, results, err_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -81,76 +54,90 @@ var UsersController = /** @class */ (function () {
                         return [4 /*yield*/, database_1.default.connect()];
                     case 1:
                         conn = _a.sent();
-                        sql = 'SELECT * FROM users_table WHERE id=($1);';
-                        return [4 /*yield*/, conn.query(sql, [id])];
+                        sql = 'SELECT * FROM products_table;';
+                        return [4 /*yield*/, conn.query(sql)];
                     case 2:
-                        result = _a.sent();
-                        conn.release();
-                        return [2 /*return*/, result.rows[0]];
+                        results = _a.sent();
+                        if (results.rows.length === 0) {
+                            throw new Error;
+                        }
+                        else {
+                            conn.release();
+                            return [2 /*return*/, results.rows];
+                        }
+                        return [3 /*break*/, 4];
                     case 3:
                         err_1 = _a.sent();
-                        throw new Error("Could not find user ".concat(id, ". Error: ").concat(err_1));
+                        throw new Error("Count not get products. Error: ".concat(err_1));
                     case 4: return [2 /*return*/];
                 }
             });
         });
     };
-    // Create new user function to add to database
-    UsersController.prototype.create = function (user) {
+    ProductsController.prototype.show = function (id) {
         return __awaiter(this, void 0, void 0, function () {
-            var conn, sql, hash, result, createdUser;
+            var conn, sql, result, err_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, database_1.default.connect()];
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
+                        return [4 /*yield*/, database_1.default.connect()];
                     case 1:
                         conn = _a.sent();
-                        sql = 'INSERT INTO users_table (first_name, last_name, user_password) VALUES($1, $2, $3) RETURNING *';
-                        hash = bcrypt_1.default.hashSync(user.user_password + pepper, Number(saltRounds));
+                        sql = 'SELECT * FROM products_table WHERE id=($1);';
+                        return [4 /*yield*/, conn.query(sql, [id])];
+                    case 2:
+                        result = _a.sent();
+                        if (result.rows.length === 0) {
+                            throw new Error();
+                        }
+                        else {
+                            conn.release();
+                            return [2 /*return*/, result.rows[0]];
+                        }
+                        return [3 /*break*/, 4];
+                    case 3:
+                        err_2 = _a.sent();
+                        throw new Error("Could not find product ".concat(id, ". Error: ").concat(err_2));
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ProductsController.prototype.create = function (product) {
+        return __awaiter(this, void 0, void 0, function () {
+            var conn, sql, results, err_3;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
+                        return [4 /*yield*/, database_1.default.connect()];
+                    case 1:
+                        conn = _a.sent();
+                        sql = 'INSERT INTO products_table (name, price, category) VALUES($1, $2, $3) RETURNING *';
                         return [4 /*yield*/, conn.query(sql, [
-                                user.first_name,
-                                user.last_name,
-                                hash,
+                                product.name,
+                                product.price,
+                                product.category,
                             ])];
                     case 2:
-                        result = _a.sent();
-                        createdUser = result.rows[0];
-                        conn.release();
-                        return [2 /*return*/, createdUser];
+                        results = _a.sent();
+                        if (results.rows.length === 0) {
+                            throw new Error();
+                        }
+                        else {
+                            conn.release();
+                            return [2 /*return*/, results.rows];
+                        }
+                        return [3 /*break*/, 4];
+                    case 3:
+                        err_3 = _a.sent();
+                        throw new Error("Could not create product ".concat(product.name, ". Error: ").concat(err_3));
+                    case 4: return [2 /*return*/];
                 }
             });
         });
     };
-    UsersController.prototype.authenticate = function (first_name, last_name, user_password) {
-        return __awaiter(this, void 0, void 0, function () {
-            var conn, sql, result, user, hash;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, database_1.default.connect()];
-                    case 1:
-                        conn = _a.sent();
-                        sql = 'SELECT user_password FROM users_table WHERE first_name=($1) AND last_name=($2);';
-                        return [4 /*yield*/, conn.query(sql, [first_name, last_name])];
-                    case 2:
-                        result = _a.sent();
-                        // If the user exists, return the user object (without the password) else return null
-                        try {
-                            if (result.rows.length) {
-                                user = result.rows[0];
-                                hash = bcrypt_1.default.hashSync(user_password, Number(saltRounds));
-                                if (bcrypt_1.default.compareSync(user_password, hash)) {
-                                    return [2 /*return*/, user];
-                                }
-                            }
-                            return [2 /*return*/, null];
-                        }
-                        catch (err) {
-                            throw new Error("Could not authenticate user ".concat(first_name, " ").concat(last_name, ". Error: ").concat(err));
-                        }
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    return UsersController;
+    return ProductsController;
 }());
-exports.UsersController = UsersController;
+exports.ProductsController = ProductsController;

@@ -1,5 +1,6 @@
+import productsRoutes from './routes/products/products.routes';
+import usersRoutes from './routes/users/users.routes';
 import express, { Request, Response } from 'express';
-import UsersRoutes from './routes/users/users.routes';
 
 const api: express.Application = express();
 
@@ -9,8 +10,7 @@ const home = async (req: Request, res: Response) => {
 };
 
 api.get('/', home);
-
-// get testing route
-api.use('/users', UsersRoutes());
+api.use('/users', usersRoutes());
+api.use('/products', productsRoutes());
 
 export default api;

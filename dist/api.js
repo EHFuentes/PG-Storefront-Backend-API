@@ -41,6 +41,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
 var users_routes_1 = __importDefault(require("./routes/users/users.routes"));
+var products_routes_1 = __importDefault(require("./routes/products/products.routes"));
 var api = (0, express_1.default)();
 // define a route handler for the default home page
 var home = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
@@ -50,6 +51,6 @@ var home = function (req, res) { return __awaiter(void 0, void 0, void 0, functi
     });
 }); };
 api.get('/', home);
-// get testing route
 api.use('/users', (0, users_routes_1.default)());
+api.use('/products', (0, products_routes_1.default)());
 exports.default = api;

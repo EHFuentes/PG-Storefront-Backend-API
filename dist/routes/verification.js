@@ -9,18 +9,25 @@ dotenv_1.default.config();
 var TOKEN_SECRET = process.env.TOKEN_SECRET;
 var verifyAuthToken = function (req, res, next) {
     try {
-        // Get token from request body
-        var token = req.body.token;
-        // Decode token using the TOKEN_SECRET from the .env file
-        var decoded = jsonwebtoken_1.default.verify(token, String(TOKEN_SECRET));
+        // Get authorization header from request
+        var authHeader = req.headers.authorization;
+        // Check if authorization header is present
+        if (!authHeader) {
+            return res
+                .status(401)
+                .json({ message: 'Authorization header is missing' });
+        }
+        // Check if authorization header is valid
+        var token = authHeader.split(' ')[1];
         // Verify token from request body using the TOKEN_SECRET from the .env file
-        jsonwebtoken_1.default.verify(token, String(TOKEN_SECRET));
-        // Add decoded token to request body
-        req.body.token = decoded;
-        next();
+        jsonwebtoken_1.default.verify(token, String(TOKEN_SECRET), function (err) {
+            if (err) {
+                return res.status(401).json({ message: 'Invalid token' });
+            }
+            next();
+        });
     }
     catch (error) {
-        // If token is invalid, return 401 status code
         res.status(401).json('Access Denied, not verified');
     }
 };

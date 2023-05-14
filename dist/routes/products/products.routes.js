@@ -39,93 +39,71 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var users_controller_1 = require("./users.controller");
+var products_controller_1 = require("./products.controller");
 var express_1 = __importDefault(require("express"));
-var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-var dotenv_1 = __importDefault(require("dotenv"));
 var verification_1 = __importDefault(require("../verification"));
-var body_parser_1 = __importDefault(require("body-parser"));
-var jsonParser = body_parser_1.default.json();
-dotenv_1.default.config();
-var TOKEN_SECRET = process.env.TOKEN_SECRET;
-var controller = new users_controller_1.UsersController();
-var usersRoutes = function () {
+var controller = new products_controller_1.ProductsController();
+var productsRoutes = function () {
     var router = express_1.default.Router();
-    // get all users
     router.get('/', verification_1.default, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-        var users, err_1;
+        var products, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     return [4 /*yield*/, controller.index()];
                 case 1:
-                    users = _a.sent();
-                    res.status(200).json(users);
+                    products = _a.sent();
+                    res.status(200).json(products);
                     return [3 /*break*/, 3];
                 case 2:
                     err_1 = _a.sent();
-                    res.status(400).json('No users found!');
+                    res
+                        .status(400)
+                        .json('No products found, check product table!');
                     return [3 /*break*/, 3];
                 case 3: return [2 /*return*/];
             }
         });
     }); });
-    // get user by id
     router.get('/:id', verification_1.default, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-        var user, err_2;
+        var product, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     return [4 /*yield*/, controller.show(req.params.id)];
                 case 1:
-                    user = _a.sent();
-                    res.status(200);
-                    res.json(user);
+                    product = _a.sent();
+                    res.status(200).json(product);
                     return [3 /*break*/, 3];
                 case 2:
                     err_2 = _a.sent();
-                    res.status(400).json('No users found!');
+                    res.status(400).json('No product found!, check product table!');
                     return [3 /*break*/, 3];
                 case 3: return [2 /*return*/];
             }
         });
     }); });
-    // create user
-    router.post('/', jsonParser, verification_1.default, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-        var newUser, token, err_3;
+    router.post('/', verification_1.default, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+        var newProduct, err_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     return [4 /*yield*/, controller.create(req.body)];
                 case 1:
-                    newUser = _a.sent();
-                    token = jsonwebtoken_1.default.sign({ user: newUser }, TOKEN_SECRET);
-                    res.json(token);
+                    newProduct = _a.sent();
+                    res.status(200).json(newProduct);
                     return [3 /*break*/, 3];
                 case 2:
                     err_3 = _a.sent();
-                    res.status(400).json('User not created!');
+                    res.status(400).json('Product not created!');
                     return [3 /*break*/, 3];
                 case 3: return [2 /*return*/];
             }
         });
     }); });
-    // authenticate a user
-    router.get('/auth/user', jsonParser, verification_1.default, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-        var user;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, controller.authenticate(req.body.first_name, req.body.last_name, req.body.user_password)];
-                case 1:
-                    user = _a.sent();
-                    res.status(200).json(user);
-                    return [2 /*return*/];
-            }
-        });
-    }); });
     return router;
 };
-exports.default = usersRoutes;
+exports.default = productsRoutes;
