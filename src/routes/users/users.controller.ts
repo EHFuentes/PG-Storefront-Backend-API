@@ -10,6 +10,7 @@ const { saltRounds, pepper } = process.env;
 export type Users = {
   first_name: string;
   last_name: string;
+  username: string;
   user_password: string;
 };
 
@@ -54,12 +55,27 @@ export class UsersController {
     }
   }
 
+  async checkUsernameExists(username: string): Promise<boolean> {
+    const conn = await Client.connect();
+    const sql = 'SELECT username FROM users_table WHERE username = $1';
+
+    const result = await conn.query(sql, [username]);
+
+    conn.release();
+
+    return result.rows.length > 0;
+  }
+
   // Create new user function to add to database
   async create(user: Users): Promise<Users> {
     const conn = await Client.connect();
 
+    if (await this.checkUsernameExists(user.username)) {
+      throw new Error('Username already taken');
+    }
+
     const sql =
-      'INSERT INTO users_table (first_name, last_name, user_password) VALUES($1, $2, $3) RETURNING *';
+      'INSERT INTO users_table (first_name, last_name, username, user_password) VALUES($1, $2, $3, $4) RETURNING *';
 
     const hash = bcrypt.hashSync(
       user.user_password + pepper,
@@ -69,11 +85,12 @@ export class UsersController {
     const result = await conn.query(sql, [
       user.first_name,
       user.last_name,
+      user.username,
       hash,
     ]);
 
     if (result.rows.length === 0) {
-      throw new Error();
+      throw new Error('Could not create user');
     } else {
       conn.release();
       return result.rows[0];
@@ -81,33 +98,30 @@ export class UsersController {
   }
 
   async authenticate(
-    first_name: string,
-    last_name: string,
-    user_password: string
+    username: string,
+    password: string
   ): Promise<Users | null> {
     const conn = await Client.connect();
 
-    const sql =
-      'SELECT user_password FROM users_table WHERE first_name=($1) AND last_name=($2);';
+    // Get the user with the specified username
+    const sql = 'SELECT user_password FROM users_table WHERE username=($1);';
 
-    const result = await conn.query(sql, [first_name, last_name]);
+    const result = await conn.query(sql, [username]);
 
     // If the user exists, return the user object (without the password) else return null
     try {
       if (result.rows.length) {
         const user = result.rows[0];
 
-        const hash = bcrypt.hashSync(user_password, Number(saltRounds));
+        const hash = bcrypt.hashSync(password, Number(saltRounds));
 
-        if (bcrypt.compareSync(user_password, hash)) {
+        if (bcrypt.compareSync(password, hash)) {
           return user;
         }
       }
       return null;
     } catch (err) {
-      throw new Error(
-        `Could not authenticate user ${first_name} ${last_name}. Error: ${err}`
-      );
+      throw new Error(`Could not authenticate user ${username}. Error: ${err}`);
     }
   }
 }

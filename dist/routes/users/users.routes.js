@@ -41,13 +41,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var users_controller_1 = require("./users.controller");
 var express_1 = __importDefault(require("express"));
-var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-var dotenv_1 = __importDefault(require("dotenv"));
 var verification_1 = __importDefault(require("../verification"));
 var body_parser_1 = __importDefault(require("body-parser"));
+var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+var bcrypt_1 = __importDefault(require("bcrypt"));
+var dotenv_1 = __importDefault(require("dotenv"));
 var jsonParser = body_parser_1.default.json();
 dotenv_1.default.config();
-var TOKEN_SECRET = process.env.TOKEN_SECRET;
+var _a = process.env, TOKEN_SECRET = _a.TOKEN_SECRET, saltRounds = _a.saltRounds;
 var controller = new users_controller_1.UsersController();
 var usersRoutes = function () {
     var router = express_1.default.Router();
@@ -65,7 +66,7 @@ var usersRoutes = function () {
                     return [3 /*break*/, 3];
                 case 2:
                     err_1 = _a.sent();
-                    res.status(400).json('No users found!');
+                    res.status(400).json('No users found!, check user table!');
                     return [3 /*break*/, 3];
                 case 3: return [2 /*return*/];
             }
@@ -86,43 +87,89 @@ var usersRoutes = function () {
                     return [3 /*break*/, 3];
                 case 2:
                     err_2 = _a.sent();
-                    res.status(400).json('No users found!');
+                    res.status(400).json('No users found!, check user table!');
                     return [3 /*break*/, 3];
                 case 3: return [2 /*return*/];
             }
         });
     }); });
-    // create user
-    router.post('/', jsonParser, verification_1.default, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-        var newUser, token, err_3;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+    // login user
+    router.post('/login', jsonParser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+        var _a, username, password, user, token, err_3;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, controller.create(req.body)];
+                    _b.trys.push([0, 2, , 3]);
+                    _a = req.body, username = _a.username, password = _a.password;
+                    return [4 /*yield*/, controller.authenticate(username, password)];
                 case 1:
-                    newUser = _a.sent();
-                    token = jsonwebtoken_1.default.sign({ user: newUser }, TOKEN_SECRET);
-                    res.json(token);
+                    user = _b.sent();
+                    token = jsonwebtoken_1.default.sign({ user: user }, String(TOKEN_SECRET));
+                    // send back the token to the client
+                    res.status(200).json({ token: token });
                     return [3 /*break*/, 3];
                 case 2:
-                    err_3 = _a.sent();
-                    res.status(400).json('User not created!');
+                    err_3 = _b.sent();
+                    res.status(400).json('User not authenticated!');
                     return [3 /*break*/, 3];
                 case 3: return [2 /*return*/];
+            }
+        });
+    }); });
+    // signup user
+    router.post('/signup', jsonParser, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+        var _a, first_name, last_name, username, password, hashedPassword, user, newUser, token, err_4;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    _b.trys.push([0, 3, , 4]);
+                    _a = req.body, first_name = _a.first_name, last_name = _a.last_name, username = _a.username, password = _a.password;
+                    return [4 /*yield*/, bcrypt_1.default.hash(password, Number(saltRounds))];
+                case 1:
+                    hashedPassword = _b.sent();
+                    user = {
+                        first_name: first_name,
+                        last_name: last_name,
+                        username: username,
+                        user_password: hashedPassword,
+                    };
+                    return [4 /*yield*/, controller.create(user)];
+                case 2:
+                    newUser = _b.sent();
+                    token = jsonwebtoken_1.default.sign({ user: newUser.user_password }, String(TOKEN_SECRET));
+                    // send back the token to the client
+                    res.status(200).json({ token: token });
+                    return [3 /*break*/, 4];
+                case 3:
+                    err_4 = _b.sent();
+                    if (err_4 instanceof Error) {
+                        res.status(400).json(err_4.message);
+                    }
+                    else {
+                        res.status(500).json('An unexpected error occurred');
+                    }
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
             }
         });
     }); });
     // authenticate a user
-    router.get('/auth/user', jsonParser, verification_1.default, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-        var user;
+    router.post('/auth/user', jsonParser, verification_1.default, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+        var user, err_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, controller.authenticate(req.body.first_name, req.body.last_name, req.body.user_password)];
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, controller.authenticate(req.body.username, req.body.password)];
                 case 1:
                     user = _a.sent();
                     res.status(200).json(user);
-                    return [2 /*return*/];
+                    return [3 /*break*/, 3];
+                case 2:
+                    err_5 = _a.sent();
+                    res.status(400).json('User not authenticated!');
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
             }
         });
     }); });

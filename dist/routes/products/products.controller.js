@@ -59,7 +59,7 @@ var ProductsController = /** @class */ (function () {
                     case 2:
                         results = _a.sent();
                         if (results.rows.length === 0) {
-                            throw new Error;
+                            throw new Error();
                         }
                         else {
                             conn.release();

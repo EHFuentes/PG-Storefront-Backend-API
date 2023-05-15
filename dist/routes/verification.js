@@ -24,6 +24,8 @@ var verifyAuthToken = function (req, res, next) {
             if (err) {
                 return res.status(401).json({ message: 'Invalid token' });
             }
+            // If token is valid, save the user object in the request object
+            // req.body.user = user;
             next();
         });
     }

@@ -42,6 +42,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var products_controller_1 = require("./products.controller");
 var express_1 = __importDefault(require("express"));
 var verification_1 = __importDefault(require("../verification"));
+var body_parser_1 = __importDefault(require("body-parser"));
+var jsonParser = body_parser_1.default.json();
 var controller = new products_controller_1.ProductsController();
 var productsRoutes = function () {
     var router = express_1.default.Router();
@@ -58,9 +60,7 @@ var productsRoutes = function () {
                     return [3 /*break*/, 3];
                 case 2:
                     err_1 = _a.sent();
-                    res
-                        .status(400)
-                        .json('No products found, check product table!');
+                    res.status(400).json('No products found, check product table!');
                     return [3 /*break*/, 3];
                 case 3: return [2 /*return*/];
             }
@@ -85,7 +85,7 @@ var productsRoutes = function () {
             }
         });
     }); });
-    router.post('/', verification_1.default, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    router.post('/', jsonParser, verification_1.default, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
         var newProduct, err_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
