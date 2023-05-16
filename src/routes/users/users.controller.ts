@@ -83,9 +83,9 @@ export class UsersController {
     );
 
     const result = await conn.query(sql, [
-      user.first_name,
-      user.last_name,
-      user.username,
+      user.first_name.toLowerCase(),
+      user.last_name.toLowerCase(),
+      user.username.toLowerCase(),
       hash,
     ]);
 
@@ -101,20 +101,23 @@ export class UsersController {
     username: string,
     password: string
   ): Promise<Users | null> {
-    const conn = await Client.connect();
-
-    // Get the user with the specified username
-    const sql = 'SELECT user_password FROM users_table WHERE username=($1);';
-
-    const result = await conn.query(sql, [username]);
-
-    // If the user exists, return the user object (without the password) else return null
     try {
+      if (!username.trim() || !password.trim()) {
+        throw new Error('Username and password must not be empty');
+      }
+
+      const conn = await Client.connect();
+
+      const sql = 'SELECT user_password FROM users_table WHERE username=($1);';
+
+      const result = await conn.query(sql, [username]);
+
+      conn.release();
+
       if (result.rows.length) {
         const user = result.rows[0];
 
         const hash = bcrypt.hashSync(password, Number(saltRounds));
-
         if (bcrypt.compareSync(password, hash)) {
           return user;
         }

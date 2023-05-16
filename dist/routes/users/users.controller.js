@@ -141,9 +141,9 @@ var UsersController = /** @class */ (function () {
                         sql = 'INSERT INTO users_table (first_name, last_name, username, user_password) VALUES($1, $2, $3, $4) RETURNING *';
                         hash = bcrypt_1.default.hashSync(user.user_password + pepper, Number(saltRounds));
                         return [4 /*yield*/, conn.query(sql, [
-                                user.first_name,
-                                user.last_name,
-                                user.username,
+                                user.first_name.toLowerCase(),
+                                user.last_name.toLowerCase(),
+                                user.username.toLowerCase(),
                                 hash,
                             ])];
                     case 3:
@@ -162,31 +162,34 @@ var UsersController = /** @class */ (function () {
     };
     UsersController.prototype.authenticate = function (username, password) {
         return __awaiter(this, void 0, void 0, function () {
-            var conn, sql, result, user, hash;
+            var conn, sql, result, user, hash, err_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, database_1.default.connect()];
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
+                        if (!username.trim() || !password.trim()) {
+                            throw new Error('Username and password must not be empty');
+                        }
+                        return [4 /*yield*/, database_1.default.connect()];
                     case 1:
                         conn = _a.sent();
                         sql = 'SELECT user_password FROM users_table WHERE username=($1);';
                         return [4 /*yield*/, conn.query(sql, [username])];
                     case 2:
                         result = _a.sent();
-                        // If the user exists, return the user object (without the password) else return null
-                        try {
-                            if (result.rows.length) {
-                                user = result.rows[0];
-                                hash = bcrypt_1.default.hashSync(password, Number(saltRounds));
-                                if (bcrypt_1.default.compareSync(password, hash)) {
-                                    return [2 /*return*/, user];
-                                }
+                        conn.release();
+                        if (result.rows.length) {
+                            user = result.rows[0];
+                            hash = bcrypt_1.default.hashSync(password, Number(saltRounds));
+                            if (bcrypt_1.default.compareSync(password, hash)) {
+                                return [2 /*return*/, user];
                             }
-                            return [2 /*return*/, null];
                         }
-                        catch (err) {
-                            throw new Error("Could not authenticate user ".concat(username, ". Error: ").concat(err));
-                        }
-                        return [2 /*return*/];
+                        return [2 /*return*/, null];
+                    case 3:
+                        err_2 = _a.sent();
+                        throw new Error("Could not authenticate user ".concat(username, ". Error: ").concat(err_2));
+                    case 4: return [2 /*return*/];
                 }
             });
         });

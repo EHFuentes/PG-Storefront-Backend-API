@@ -39,12 +39,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProductsController = void 0;
+exports.OrdersController = void 0;
 var database_1 = __importDefault(require("../../database"));
-var ProductsController = /** @class */ (function () {
-    function ProductsController() {
+var OrdersController = /** @class */ (function () {
+    function OrdersController() {
     }
-    ProductsController.prototype.index = function () {
+    OrdersController.prototype.index = function () {
         return __awaiter(this, void 0, void 0, function () {
             var conn, sql, results, err_1;
             return __generator(this, function (_a) {
@@ -54,7 +54,7 @@ var ProductsController = /** @class */ (function () {
                         return [4 /*yield*/, database_1.default.connect()];
                     case 1:
                         conn = _a.sent();
-                        sql = 'SELECT * FROM products_table;';
+                        sql = 'SELECT * FROM orders_table;';
                         return [4 /*yield*/, conn.query(sql)];
                     case 2:
                         results = _a.sent();
@@ -68,13 +68,13 @@ var ProductsController = /** @class */ (function () {
                         return [3 /*break*/, 4];
                     case 3:
                         err_1 = _a.sent();
-                        throw new Error("Count not get products. Error: ".concat(err_1));
+                        throw new Error('No orders found!');
                     case 4: return [2 /*return*/];
                 }
             });
         });
     };
-    ProductsController.prototype.show = function (id) {
+    OrdersController.prototype.show = function (id) {
         return __awaiter(this, void 0, void 0, function () {
             var conn, sql, result, err_2;
             return __generator(this, function (_a) {
@@ -84,7 +84,7 @@ var ProductsController = /** @class */ (function () {
                         return [4 /*yield*/, database_1.default.connect()];
                     case 1:
                         conn = _a.sent();
-                        sql = 'SELECT * FROM products_table WHERE id=($1);';
+                        sql = 'SELECT * FROM orders_table WHERE id=($1)';
                         return [4 /*yield*/, conn.query(sql, [id])];
                     case 2:
                         result = _a.sent();
@@ -93,18 +93,18 @@ var ProductsController = /** @class */ (function () {
                         }
                         else {
                             conn.release();
-                            return [2 /*return*/, result.rows[0]];
+                            return [2 /*return*/, result.rows];
                         }
                         return [3 /*break*/, 4];
                     case 3:
                         err_2 = _a.sent();
-                        throw new Error("Could not find product ".concat(id, ". Error: ").concat(err_2));
+                        throw new Error('No order found!');
                     case 4: return [2 /*return*/];
                 }
             });
         });
     };
-    ProductsController.prototype.create = function (product) {
+    OrdersController.prototype.create = function (order) {
         return __awaiter(this, void 0, void 0, function () {
             var conn, sql, results, err_3;
             return __generator(this, function (_a) {
@@ -114,14 +114,19 @@ var ProductsController = /** @class */ (function () {
                         return [4 /*yield*/, database_1.default.connect()];
                     case 1:
                         conn = _a.sent();
-                        sql = 'INSERT INTO products_table (product_name, price, product_category) VALUES($1, $2, $3) RETURNING *';
+                        sql = 'INSERT INTO orders_table (product_id,product_quantity, user_id, order_status) VALUES($1, $2, $3, $4) RETURNING *';
                         return [4 /*yield*/, conn.query(sql, [
-                                product.product_name.toLowerCase(),
-                                product.price,
-                                product.product_category.toLowerCase(),
+                                order.product_id,
+                                order.product_quantity,
+                                order.user_id,
+                                order.order_status.toLowerCase(),
                             ])];
                     case 2:
                         results = _a.sent();
+                        if (order.order_status !== 'active' &&
+                            order.order_status !== 'complete') {
+                            throw new Error();
+                        }
                         if (results.rows.length === 0) {
                             throw new Error();
                         }
@@ -132,14 +137,14 @@ var ProductsController = /** @class */ (function () {
                         return [3 /*break*/, 4];
                     case 3:
                         err_3 = _a.sent();
-                        throw new Error("Could not create product ".concat(product.product_name, ". Error: ").concat(err_3));
+                        throw new Error('Could not create order!');
                     case 4: return [2 /*return*/];
                 }
             });
         });
     };
-    // Products by category (args: product category)
-    ProductsController.prototype.productCategory = function (productCategory) {
+    // Current Order by user (args: user id)
+    OrdersController.prototype.currentOrders = function (user_id) {
         return __awaiter(this, void 0, void 0, function () {
             var conn, sql, results, err_4;
             return __generator(this, function (_a) {
@@ -149,8 +154,24 @@ var ProductsController = /** @class */ (function () {
                         return [4 /*yield*/, database_1.default.connect()];
                     case 1:
                         conn = _a.sent();
-                        sql = 'SELECT * FROM products_table WHERE product_category=($1);';
-                        return [4 /*yield*/, conn.query(sql, [productCategory])];
+                        sql = 'SELECT \n' +
+                            '\tot.id, \n' +
+                            '\tot.product_id, \n' +
+                            '\tpt.product_name, \n' +
+                            '\tpt.price, \n' +
+                            '\tot.product_quantity, \n' +
+                            '\tpt.product_category, \n' +
+                            '\tut.id as user_id,\n' +
+                            '\tut.username,\n' +
+                            '\tot.order_status \n' +
+                            'FROM orders_table AS ot \n' +
+                            'INNER JOIN products_table AS pt \n' +
+                            'ON pt.id = ot.product_id \n' +
+                            'INNER JOIN users_table as ut\n' +
+                            'ON ut.id = ot.user_id\n' +
+                            '\n' +
+                            "WHERE ot.order_status = 'active' AND ut.id = $1;";
+                        return [4 /*yield*/, conn.query(sql, [user_id])];
                     case 2:
                         results = _a.sent();
                         if (results.rows.length === 0) {
@@ -163,14 +184,14 @@ var ProductsController = /** @class */ (function () {
                         return [3 /*break*/, 4];
                     case 3:
                         err_4 = _a.sent();
-                        throw new Error("Could not find product category \"".concat(productCategory, "\". Error: ").concat(err_4));
+                        throw new Error("Could not get current orders. Error: ".concat(err_4));
                     case 4: return [2 /*return*/];
                 }
             });
         });
     };
-    // Top 5 most popular products
-    ProductsController.prototype.getTopFive = function () {
+    // Completed Orders by user (args: user id)
+    OrdersController.prototype.ordersByUsers = function (user_id) {
         return __awaiter(this, void 0, void 0, function () {
             var conn, sql, results, err_5;
             return __generator(this, function (_a) {
@@ -187,15 +208,21 @@ var ProductsController = /** @class */ (function () {
                             '\tpt.price, \n' +
                             '\tot.product_quantity, \n' +
                             '\tpt.product_category, \n' +
+                            '\tut.id as user_id,\n' +
+                            '\tut.username,\n' +
                             '\tot.order_status \n' +
                             'FROM orders_table AS ot \n' +
                             'INNER JOIN products_table AS pt \n' +
-                            'ON pt.id = ot.product_id ORDER BY product_quantity DESC limit 5;';
-                        return [4 /*yield*/, conn.query(sql)];
+                            'ON pt.id = ot.product_id \n' +
+                            'INNER JOIN users_table as ut\n' +
+                            'ON ut.id = ot.user_id\n' +
+                            '\n' +
+                            "WHERE ot.order_status = 'complete' AND ut.id = $1;";
+                        return [4 /*yield*/, conn.query(sql, [user_id])];
                     case 2:
                         results = _a.sent();
                         if (results.rows.length === 0) {
-                            throw new Error('No products found in top five!'); // specify an error message
+                            throw new Error();
                         }
                         else {
                             conn.release();
@@ -204,12 +231,12 @@ var ProductsController = /** @class */ (function () {
                         return [3 /*break*/, 4];
                     case 3:
                         err_5 = _a.sent();
-                        throw new Error("Could not find top five products. Error: ".concat(err_5));
+                        throw new Error('No orders found!');
                     case 4: return [2 /*return*/];
                 }
             });
         });
     };
-    return ProductsController;
+    return OrdersController;
 }());
-exports.ProductsController = ProductsController;
+exports.OrdersController = OrdersController;
