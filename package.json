@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "ENV=test && npx tsc && db-migrate --env test up && npm run jasmine && db-migrate db:drop test",
+    "jasmine": "jasmine",
     "watch": "ENV=dev && tsc-watch --esModuleInterop src/server.ts --outDir ./dist --onSuccess 'node ./dist/server.js'",
     "lint": "eslint . --ext .ts",
     "prettier": "prettier --config .prettierrc 'src/**/*.ts' --write"
@@ -40,6 +41,7 @@
     "jasmine-spec-reporter": "^7.0.0",
     "jasmine-ts": "^0.4.0",
     "prettier": "^2.8.8",
+    "supertest": "^6.3.3",
     "ts-node": "^10.9.1",
     "tsc-watch": "^6.0.4",
     "typescript": "^5.0.4"

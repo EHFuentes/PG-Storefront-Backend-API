@@ -1,4 +1,4 @@
-import Client from '../../database';
+import Client from '../database';
 
 export type Orders = {
   product_id: number;
@@ -7,7 +7,7 @@ export type Orders = {
   order_status: string;
 };
 
-export class OrdersController {
+export class OrdersModel {
   async index() {
     try {
       const conn = await Client.connect();

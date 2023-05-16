@@ -1,4 +1,4 @@
-import { Users, UsersController } from '../routes/users/users.controller';
+import { Users, UsersModel } from '../models/users.model';
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
@@ -6,12 +6,12 @@ import bcrypt from 'bcrypt';
 
 dotenv.config();
 const { TOKEN_SECRET, saltRounds } = process.env;
-const controller = new UsersController();
+const model = new UsersModel();
 
-export class UsersModel {
+export class UsersController {
   async getAllUsers(req: Request, res: Response) {
     try {
-      const users = await controller.index();
+      const users = await model.index();
       res.status(200).json(users);
     } catch (err) {
       res.status(400).json('No users found!');
@@ -20,7 +20,7 @@ export class UsersModel {
 
   async getUserById(req: Request, res: Response) {
     try {
-      const user = await controller.show(req.params.id);
+      const user = await model.show(req.params.id);
       res.status(200).json(user);
     } catch (err) {
       res.status(400).json('No users found!');
@@ -30,7 +30,7 @@ export class UsersModel {
   async loginUser(req: Request, res: Response) {
     try {
       const { username, password } = req.body;
-      const user = await controller.authenticate(username, password);
+      const user = await model.authenticate(username, password);
 
       // signing user with token
       const token = jwt.sign({ user: user }, String(TOKEN_SECRET));
@@ -57,7 +57,7 @@ export class UsersModel {
       };
 
       // create the user in the database
-      const newUser = await controller.create(user);
+      const newUser = await model.create(user);
 
       // Generate a token for the new user
       const token = jwt.sign(
@@ -79,11 +79,8 @@ export class UsersModel {
   async authLogin(req: Request, res: Response) {
     try {
       const { username, password } = req.body;
-      //   if (!username || !password) {
-      //     console.log('username', username, 'password', password);
-      //     res.status(400).json('Check username and password!');
-      // }
-      const user = await controller.authenticate(username, password);
+
+      const user = await model.authenticate(username, password);
 
       res.status(200).json(user);
     } catch (err) {

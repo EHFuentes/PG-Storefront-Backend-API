@@ -1,4 +1,4 @@
-import Client from '../../database';
+import Client from '../database';
 
 export type Products = {
   product_name: string;
@@ -6,7 +6,7 @@ export type Products = {
   product_category: string;
 };
 
-export class ProductsController {
+export class ProductsModel {
   async index(): Promise<Products[]> {
     try {
       const conn = await Client.connect();

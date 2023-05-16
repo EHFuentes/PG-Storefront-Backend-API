@@ -1,4 +1,4 @@
-import Client from '../../database';
+import Client from '../database';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 
@@ -14,7 +14,7 @@ export type Users = {
   user_password: string;
 };
 
-export class UsersController {
+export class UsersModel {
   // Get all users
   async index(): Promise<Users[]> {
     // Connect to database
