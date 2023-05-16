@@ -1,4 +1,4 @@
-import Client from '../database';
+import Client from '../services/database';
 
 export type Products = {
   product_name: string;
