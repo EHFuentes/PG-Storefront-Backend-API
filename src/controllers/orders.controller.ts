@@ -41,11 +41,28 @@ export class OrdersController {
   }
 
   async createOrder(req: Request, res: Response) {
+    const { user_id, product_id, product_quantity, order_status } = req.body;
+
     try {
+      if (
+        typeof user_id !== 'number' ||
+        typeof product_id !== 'number' ||
+        typeof product_quantity !== 'number' ||
+        typeof order_status !== 'string'
+      ) {
+        res.status(400).json('Invalid data type');
+        return;
+      }
+
+      if (!user_id || !product_id || !product_quantity || !order_status) {
+        res.status(400).json('Missing required fields!');
+        return;
+      }
+
       const order = await model.create(req.body);
-      res.status(200).json(order);
+      res.status(201).json(order);
     } catch (err) {
-      res.status(400).json('Could not create order!');
+      res.status(400).json('Could not create order!, check values.');
     }
   }
 }

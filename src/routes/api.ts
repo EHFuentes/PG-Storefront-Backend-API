@@ -5,7 +5,7 @@ import usersRoute from './users.route';
 
 const api: express.Application = express();
 
-// define a route handler for the default home page
+// Define a route handler for the default home page
 const home = async (req: Request, res: Response) => {
   res.send('Hello World!');
 };

@@ -1,7 +1,7 @@
-import express from 'express';
 import { OrdersController } from '../controllers/orders.controller';
 import verifyAuthToken from '../services/verification';
 import bodyParser from 'body-parser';
+import express from 'express';
 
 const jsonParser = bodyParser.json();
 const controller = new OrdersController();
@@ -14,13 +14,13 @@ const orderRoutes = () => {
   router.get('/:id', verifyAuthToken, controller.getOrderById);
 
   router.get(
-    '/active/usr/:user_id',
+    '/status/active/:user_id',
     verifyAuthToken,
     controller.getActiveOrdersByUserId
   );
 
   router.get(
-    '/complete/usr/:user_id',
+    '/status/complete/:user_id',
     verifyAuthToken,
     controller.getCompleteOrdersByUserId
   );

@@ -103,6 +103,7 @@ export class OrdersModel {
         "WHERE ot.order_status = 'active' AND ut.id = $1;";
 
       const results = await conn.query(sql, [user_id]);
+
       if (results.rows.length === 0) {
         throw new Error();
       } else {
@@ -139,6 +140,7 @@ export class OrdersModel {
         "WHERE ot.order_status = 'complete' AND ut.id = $1;";
 
       const results = await conn.query(sql, [user_id]);
+      console.log(results.rows);
 
       if (results.rows.length === 0) {
         throw new Error();

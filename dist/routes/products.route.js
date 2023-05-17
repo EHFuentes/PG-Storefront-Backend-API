@@ -15,7 +15,7 @@ const productsRoute = () => {
     router.get('/:id', controller.getProductById);
     router.get('/category/:product_category', controller.getProductByCategory);
     router.get('/orders/top', controller.getTopFive);
-    router.post('/', jsonParser, verification_1.default, controller.createProduct);
+    router.post('/create', jsonParser, verification_1.default, controller.createProduct);
     return router;
 };
 exports.default = productsRoute;

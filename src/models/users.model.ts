@@ -122,6 +122,7 @@ export class UsersModel {
           return user;
         }
       }
+
       return null;
     } catch (err) {
       throw new Error(`Could not authenticate user ${username}. Error: ${err}`);

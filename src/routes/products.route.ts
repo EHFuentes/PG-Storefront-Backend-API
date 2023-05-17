@@ -17,7 +17,7 @@ const productsRoute = () => {
 
   router.get('/orders/top', controller.getTopFive);
 
-  router.post('/', jsonParser, verifyAuthToken, controller.createProduct);
+  router.post('/create', jsonParser, verifyAuthToken, controller.createProduct);
 
   return router;
 };

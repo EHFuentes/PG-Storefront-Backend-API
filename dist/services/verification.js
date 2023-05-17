@@ -13,9 +13,7 @@ const verifyAuthToken = (req, res, next) => {
         const authHeader = req.headers.authorization;
         // Check if authorization header is present
         if (!authHeader) {
-            return res
-                .status(401)
-                .json({ message: 'Authorization header is missing' });
+            return res.status(401).json({ message: 'Access Denied, not verified ' });
         }
         // Check if authorization header is valid
         const token = authHeader.split(' ')[1];

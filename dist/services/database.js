@@ -10,7 +10,6 @@ dotenv_1.default.config();
 // destructure the .env file for the database connection
 const { POSTGRES_HOST, POSTGRES_DB_DEV, POSTGRES_DB_TEST, POSTGRES_USER, POSTGRES_PASSWORD, ENV, } = process.env;
 let Client = new pg_1.Pool();
-console.log('ENV:', ENV);
 // if the environment is tests, then we will use the test database
 if (ENV === 'test') {
     Client = new pg_1.Pool({
@@ -29,4 +28,5 @@ if (ENV === 'dev') {
         password: POSTGRES_PASSWORD,
     });
 }
+console.log('ENV: checking', ENV);
 exports.default = Client;

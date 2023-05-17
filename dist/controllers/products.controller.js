@@ -41,12 +41,24 @@ class ProductsController {
         }
     }
     async createProduct(req, res) {
+        if (typeof req.body.product_name !== 'string' ||
+            typeof req.body.price !== 'string' ||
+            typeof req.body.product_category !== 'string') {
+            res.status(400).json('Invalid data type');
+            return;
+        }
+        if (!req.body.product_name.trim() ||
+            !req.body.price.trim() ||
+            !req.body.product_category.trim()) {
+            res.status(400).json('Missing required fields!');
+            return;
+        }
         try {
             const product = await model.create(req.body);
-            res.status(200).json(product);
+            res.status(201).json(product);
         }
         catch (err) {
-            res.status(400).json('Count not create product!');
+            res.status(400).json('Could not create product!');
         }
     }
 }

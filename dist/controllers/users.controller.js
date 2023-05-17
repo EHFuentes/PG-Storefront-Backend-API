@@ -46,6 +46,20 @@ class UsersController {
     async signupUser(req, res) {
         try {
             const { first_name, last_name, username, password } = req.body;
+            if (typeof first_name !== 'string' ||
+                typeof last_name !== 'string' ||
+                typeof username !== 'string' ||
+                typeof password !== 'string') {
+                res.status(400).json('Invalid data type');
+                return;
+            }
+            if (!first_name.trim() ||
+                !last_name.trim() ||
+                !username.trim() ||
+                !password.trim()) {
+                res.status(400).json('Missing required fields!');
+                return;
+            }
             // Hash the password before storing it in the database
             const hashedPassword = await bcrypt_1.default.hash(password, Number(saltRounds));
             const user = {
@@ -59,7 +73,7 @@ class UsersController {
             // Generate a token for the new user
             const token = jsonwebtoken_1.default.sign({ user: newUser.user_password }, String(TOKEN_SECRET));
             // send back the token to the client
-            res.status(200).json({ token: token });
+            res.status(201).json({ token: token });
         }
         catch (err) {
             if (err instanceof Error) {

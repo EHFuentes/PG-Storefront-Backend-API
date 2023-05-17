@@ -6,64 +6,59 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_test_1 = require("node:test");
 const supertest_1 = __importDefault(require("supertest"));
 const server_1 = __importDefault(require("../../server"));
-const request = (0, supertest_1.default)(server_1.default);
 const createUserAndGetToken_1 = require("../helpers/createUserAndGetToken");
+const request = (0, supertest_1.default)(server_1.default);
 let token;
-(0, node_test_1.describe)('Orders model', () => {
+(0, node_test_1.describe)('Products model', () => {
     beforeAll(async () => {
         token = await (0, createUserAndGetToken_1.createUserAndGetToken)();
     });
-    // create an order
-    it('should create an order', async () => {
-        // Create the first order
-        const response1 = await request
-            .post('/v1/orders/create')
+    // create a product
+    it('should create a product', async () => {
+        const response = await request
+            .post('/v1/products/create')
             .set('Authorization', 'Bearer ' + token)
             .send({
-            product_id: 1,
-            product_quantity: 2,
-            user_id: 1,
-            order_status: 'active',
+            product_name: 'test product',
+            price: '10',
+            product_category: 'test_category',
         });
-        // Create the second order
         const response2 = await request
-            .post('/v1/orders/create')
+            .post('/v1/products/create')
             .set('Authorization', 'Bearer ' + token)
             .send({
-            product_id: 2,
-            product_quantity: 2,
-            user_id: 1,
-            order_status: 'complete',
+            product_name: 'test product 2',
+            price: '20',
+            product_category: 'test_category',
         });
-        // Check if both orders were created successfully
-        expect(response1.status).toBe(201);
+        expect(response.status).toBe(201);
         expect(response2.status).toBe(201);
     });
-    // get order by id
-    it('should get order by id', async () => {
+    // product by id
+    it('should get a product by id', async () => {
         const response = await request
-            .get('/v1/orders/1')
+            .get('/v1/products/1')
             .set('Authorization', 'Bearer ' + token);
         expect(response.status).toBe(200);
     });
-    // get active orders by user id
-    it('should get active orders by user id', async () => {
+    // product by category
+    it('should get a product by category', async () => {
         const response = await request
-            .get('/v1/orders/status/active/1')
+            .get('/v1/products/category/test_category')
             .set('Authorization', 'Bearer ' + token);
         expect(response.status).toBe(200);
     });
-    // get complete orders by user id
-    it('should get complete orders by user id', async () => {
+    // all products
+    it('should get all products', async () => {
         const response = await request
-            .get('/v1/orders/status/complete/1')
+            .get('/v1/products')
             .set('Authorization', 'Bearer ' + token);
         expect(response.status).toBe(200);
     });
-    // get all orders
-    it('should get all orders', async () => {
+    // top 5 products
+    it('should get top 5 products', async () => {
         const response = await request
-            .get('/v1/orders')
+            .get('/v1/products/orders/top')
             .set('Authorization', 'Bearer ' + token);
         expect(response.status).toBe(200);
     });

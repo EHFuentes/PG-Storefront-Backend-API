@@ -30,6 +30,7 @@ export class UsersController {
   async loginUser(req: Request, res: Response) {
     try {
       const { username, password } = req.body;
+
       const user = await model.authenticate(username, password);
 
       // signing user with token
@@ -45,6 +46,26 @@ export class UsersController {
   async signupUser(req: Request, res: Response) {
     try {
       const { first_name, last_name, username, password } = req.body;
+
+      if (
+        typeof first_name !== 'string' ||
+        typeof last_name !== 'string' ||
+        typeof username !== 'string' ||
+        typeof password !== 'string'
+      ) {
+        res.status(400).json('Invalid data type');
+        return;
+      }
+
+      if (
+        !first_name.trim() ||
+        !last_name.trim() ||
+        !username.trim() ||
+        !password.trim()
+      ) {
+        res.status(400).json('Missing required fields!');
+        return;
+      }
 
       // Hash the password before storing it in the database
       const hashedPassword = await bcrypt.hash(password, Number(saltRounds));
@@ -66,7 +87,7 @@ export class UsersController {
       );
 
       // send back the token to the client
-      res.status(200).json({ token: token });
+      res.status(201).json({ token: token });
     } catch (err) {
       if (err instanceof Error) {
         res.status(400).json(err.message);

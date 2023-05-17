@@ -8,7 +8,7 @@ const products_route_1 = __importDefault(require("./products.route"));
 const orders_route_1 = __importDefault(require("./orders.route"));
 const users_route_1 = __importDefault(require("./users.route"));
 const api = (0, express_1.default)();
-// define a route handler for the default home page
+// Define a route handler for the default home page
 const home = async (req, res) => {
     res.send('Hello World!');
 };
