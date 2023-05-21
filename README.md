@@ -1,4 +1,4 @@
-# Storefront API Overview
+# Storefront API
 
 This project is a RESTful API for an online storefront. It's built with TypeScript, Node.js, Express, and PostgreSQL, and provides a backend for managing products, users, and orders.
 
@@ -73,38 +73,93 @@ for both the development and test databases. These are used by the Client object
 - GET /v1/products/:id: Get product information by ID.
 - GET /v1/products/category/:product_category: Get products by category.
 - GET /v1/products/orders/top: Retrieve the top 5 products based on order quantity.
-- POST /v1/products/create: Create a new product.
+- POST /v1/products/create: Create a new product. (Authorization required)
 #### Users
-- POST /v1/users/signup: Register a new user.
+- GET /v1/users: Retrieve all users. (Authorization required)
+- GET /v1/users/:id: Get user information by ID. (Authorization required)
 - POST /v1/users/login: Authenticate a user and retrieve a JWT token.
-- GET /v1/users/:id: Get user information by ID.
+- POST /v1/users/signup: Register a new user.
+- POST /v1/users/auth/user: Authorize login. (Authorization required)
 #### Orders
-- GET /v1/orders: Retrieve all orders.
-- GET /v1/orders/:id: Get order information by ID.
-- GET /v1/orders/status/active/:user_id: Get active orders by user ID.
-- GET /v1/orders/status/complete/:user_id: Get complete orders by user ID.
-- POST /v1/orders/create: Create a new order.
+- GET /v1/orders: Retrieve all orders. (Authorization required)
+- GET /v1/orders/:id: Get order information by ID. (Authorization required)
+- GET /v1/orders/status/active/:user_id: Get active orders by user ID. (Authorization required)
+- GET /v1/orders/status/complete/:user_id: Get complete orders by user ID. (Authorization required)
+- GET /v1/orders/cart/products: Get products in an order. (Authorization required)
+- POST /v1/orders/create: Create a new order. (Authorization required)
+- POST /v1/orders/:order_id/products: Add product to order. (Authorization required)
 
-# Data Shapes
+- Please note that (Authorization required) means that the request needs to be made with a valid JWT token.
+
+## Data Shapes
 The API handles the following data structures:
 
-#### Products
-- id
-- product_name
-- price
-- product_category
 #### Users
-- id
-- first_name
-- last_name
-- username
-- user_password 
+- id: A unique identifier for the user.
+- first_name: The user's first name.
+- last_name: The user's last name.
+- username: The user's username.
+- user_password: The user's password. 
+
+Users Table Schema:
+```postgres-psql
+CREATE TABLE IF NOT EXISTS users_table (
+    id SERIAL PRIMARY KEY NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    username VARCHAR(100) NOT NULL,
+    user_password VARCHAR(100) NOT NULL
+);
+```
+
+#### Products
+- id: A unique identifier for the product.
+- product_name: The name of the product.
+- price: The price of the product.
+- product_category: The category of the product.
+
+Products Table Schema:
+```postgres-psql
+CREATE TABLE IF NOT EXISTS products_table (
+    id SERIAL PRIMARY KEY NOT NULL,
+    product_name VARCHAR(100) NOT NULL,
+    price FLOAT NOT NULL,
+    product_category VARCHAR(100) NOT NULL
+);
+```
+
 #### Orders
-- id
-- product_id
-- product_quantity
-- user_id
-- order_status (active or complete)
+- id: A unique identifier for the order.
+- user_id: The ID of the user who made the order.
+- order_status: The status of the order, can be 'active' or 'complete'.
+
+Orders Table Schema:
+```postgres-psql
+CREATE TABLE IF NOT EXISTS orders_table (
+    id SERIAL PRIMARY KEY NOT NULL,
+    user_id int REFERENCES users_table(id) NOT NULL,
+    order_status varchar(50) NOT NULL
+);
+```
+
+#### OrderProduct
+- order_id: The ID of the order.
+- product_id: The ID of the product.
+- product_quantity: The quantity of the product in the order.
+
+OrderProduct Table Schema:
+
+```postgres-psql
+CREATE TABLE IF NOT EXISTS order_product (
+    order_id INT REFERENCES orders_table(id) NOT NULL,
+    product_id INT REFERENCES products_table(id) NOT NULL,
+    product_quantity INT NOT NULL,
+    PRIMARY KEY (order_id, product_id)
+);
+
+```
+
+These structures define the data shapes expected by the API endpoints when interacting with the database.
 
 
 ## Testing
