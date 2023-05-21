@@ -15,8 +15,15 @@ CREATE TABLE IF NOT EXISTS products_table (
 
 CREATE TABLE IF NOT EXISTS orders_table (
     id SERIAL PRIMARY KEY NOT NULL,
-    product_id int NOT NULL,
-    product_quantity int NOT NULL,
-    user_id int NOT NULL,
+    user_id int REFERENCES users_table(id) NOT NULL,
     order_status varchar(50) NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS order_product (
+    order_id INT REFERENCES orders_table(id) NOT NULL,
+    product_id INT REFERENCES products_table(id) NOT NULL,
+    product_quantity INT NOT NULL,
+    PRIMARY KEY (order_id, product_id)
+);
+
+

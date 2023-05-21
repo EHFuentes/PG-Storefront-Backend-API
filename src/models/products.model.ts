@@ -49,8 +49,8 @@ export class ProductsModel {
     try {
       const conn = await Client.connect();
 
-      const sql =
-        'INSERT INTO products_table (product_name, price, product_category) VALUES($1, $2, $3) RETURNING *';
+      const sql = `INSERT INTO products_table (product_name, price, product_category)
+         VALUES($1, $2, $3) RETURNING *`;
 
       const results = await conn.query(sql, [
         product.product_name.toLowerCase(),
@@ -98,18 +98,19 @@ export class ProductsModel {
     try {
       const conn = await Client.connect();
 
-      const sql =
-        'SELECT \n' +
-        '\tot.id, \n' +
-        '\tot.product_id, \n' +
-        '\tpt.product_name, \n' +
-        '\tpt.price, \n' +
-        '\tot.product_quantity, \n' +
-        '\tpt.product_category, \n' +
-        '\tot.order_status \n' +
-        'FROM orders_table AS ot \n' +
-        'INNER JOIN products_table AS pt \n' +
-        'ON pt.id = ot.product_id ORDER BY product_quantity DESC limit 5;';
+      const sql = `SELECT
+            ot.id as order_id,
+            pt.product_name,
+            op.product_id,
+            pt.price,
+            op.product_quantity,
+            pt.product_category,
+            ot.order_status
+
+          FROM orders_table AS ot
+          INNER JOIN order_product AS op ON op.order_id = ot.id
+          INNER JOIN products_table AS pt ON pt.id = op.product_id
+          ORDER BY op.product_quantity DESC;`;
 
       const results = await conn.query(sql);
 

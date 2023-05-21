@@ -1,6 +1,5 @@
-// testHelpers.ts
 import supertest from 'supertest';
-import app from '../../app'; // Replace './app' with the path to your app file
+import app from '../../app';
 
 export async function createUserAndGetToken(): Promise<string> {
   const user = {

@@ -68,7 +68,10 @@ export class UsersController {
       }
 
       // Hash the password before storing it in the database
-      const hashedPassword = await bcrypt.hash(password, Number(saltRounds));
+      const hashedPassword = await bcrypt.hash(
+        String(password),
+        Number(saltRounds)
+      );
 
       const user: Users = {
         first_name: first_name,

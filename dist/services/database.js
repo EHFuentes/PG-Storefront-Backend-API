@@ -3,13 +3,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const dotenv_1 = __importDefault(require("dotenv"));
-const pg_1 = require("pg");
+var dotenv_1 = __importDefault(require("dotenv"));
+var pg_1 = require("pg");
 // load the .env file
 dotenv_1.default.config();
 // destructure the .env file for the database connection
-const { POSTGRES_HOST, POSTGRES_DB_DEV, POSTGRES_DB_TEST, POSTGRES_USER, POSTGRES_PASSWORD, ENV, } = process.env;
-let Client = new pg_1.Pool();
+var _a = process.env, POSTGRES_HOST = _a.POSTGRES_HOST, POSTGRES_DB_DEV = _a.POSTGRES_DB_DEV, POSTGRES_DB_TEST = _a.POSTGRES_DB_TEST, POSTGRES_USER = _a.POSTGRES_USER, POSTGRES_PASSWORD = _a.POSTGRES_PASSWORD, ENV = _a.ENV;
+var Client = new pg_1.Pool();
 // if the environment is tests, then we will use the test database
 if (ENV === 'test') {
     Client = new pg_1.Pool({

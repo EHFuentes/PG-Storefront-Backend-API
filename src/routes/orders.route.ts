@@ -25,7 +25,16 @@ const orderRoutes = () => {
     controller.getCompleteOrdersByUserId
   );
 
+  router.get('/cart/products', verifyAuthToken, controller.getProductsInOrder);
+
   router.post('/create', jsonParser, verifyAuthToken, controller.createOrder);
+
+  router.post(
+    '/:order_id/products',
+    jsonParser,
+    verifyAuthToken,
+    controller.addProductToOrder
+  );
 
   return router;
 };

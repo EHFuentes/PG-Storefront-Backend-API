@@ -1,7 +1,7 @@
+import { createUserAndGetToken } from './helpers/createUserAndGetToken';
 import { describe } from 'node:test';
 import supertest from 'supertest';
-import app from '../../server';
-import { createUserAndGetToken } from '../helpers/createUserAndGetToken';
+import app from '../server';
 
 const request = supertest(app);
 

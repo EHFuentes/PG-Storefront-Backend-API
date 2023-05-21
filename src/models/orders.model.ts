@@ -1,10 +1,11 @@
 import Client from '../services/database';
 
 export type Orders = {
-  product_id: number;
-  product_quantity: number;
   user_id: number;
   order_status: string;
+  order_id: number;
+  product_id: number;
+  product_quantity: number;
 };
 
 export class OrdersModel {
@@ -46,26 +47,73 @@ export class OrdersModel {
     }
   }
 
-  async create(order: Orders): Promise<Orders[]> {
+  async addProduct(
+    order_id: number,
+    product_id: number,
+    product_quantity: number
+  ): Promise<Orders[]> {
+    // add product to order if order is active
     try {
       const conn = await Client.connect();
 
       const sql =
-        'INSERT INTO orders_table (product_id,product_quantity, user_id, order_status) VALUES($1, $2, $3, $4) RETURNING *';
+        'INSERT INTO order_product (order_id, product_id, product_quantity) VALUES($1, $2, $3) RETURNING *';
 
       const results = await conn.query(sql, [
-        order.product_id,
-        order.product_quantity,
-        order.user_id,
-        order.order_status.toLowerCase(),
+        order_id,
+        product_id,
+        product_quantity,
       ]);
 
+      if (results.rows.length === 0) {
+        throw new Error();
+      } else {
+        conn.release();
+        return results.rows;
+      }
+    } catch (err) {
+      throw new Error('Could not add product!');
+    }
+  }
+
+  // get orders in cart
+  async getProductsInOrder() {
+    try {
+      const conn = await Client.connect();
+
+      const sql = `SELECT * FROM order_product;`;
+
+      const result = await conn.query(sql);
+
+      if (result.rows.length === 0) {
+        throw new Error();
+      } else {
+        conn.release();
+        return result.rows;
+      }
+    } catch (err) {
+      throw new Error('Could not get cart!');
+    }
+  }
+
+  async create(order: Orders): Promise<Orders[]> {
+    try {
       if (
         order.order_status !== 'active' &&
         order.order_status !== 'complete'
       ) {
-        throw new Error();
+        throw new Error('Invalid order status!');
       }
+
+      const conn = await Client.connect();
+
+      const sql =
+        'INSERT INTO orders_table (user_id, order_status) VALUES($1, $2) RETURNING *';
+
+      const results = await conn.query(sql, [
+        order.user_id,
+        order.order_status.toLowerCase(),
+      ]);
 
       if (results.rows.length === 0) {
         throw new Error();
@@ -83,24 +131,22 @@ export class OrdersModel {
     try {
       const conn = await Client.connect();
 
-      const sql =
-        'SELECT \n' +
-        '\tot.id, \n' +
-        '\tot.product_id, \n' +
-        '\tpt.product_name, \n' +
-        '\tpt.price, \n' +
-        '\tot.product_quantity, \n' +
-        '\tpt.product_category, \n' +
-        '\tut.id as user_id,\n' +
-        '\tut.username,\n' +
-        '\tot.order_status \n' +
-        'FROM orders_table AS ot \n' +
-        'INNER JOIN products_table AS pt \n' +
-        'ON pt.id = ot.product_id \n' +
-        'INNER JOIN users_table as ut\n' +
-        'ON ut.id = ot.user_id\n' +
-        '\n' +
-        "WHERE ot.order_status = 'active' AND ut.id = $1;";
+      const sql = `SELECT
+                ot.id as order_id,
+                pt.product_name,
+                op.product_id,
+                pt.price,
+                op.product_quantity,
+                pt.product_category,
+                ot.user_id,
+                ut.username,
+                ot.order_status
+
+              FROM orders_table AS ot
+              INNER JOIN order_product AS op ON op.order_id = ot.id
+              INNER JOIN products_table AS pt ON pt.id = op.product_id
+              LEFT JOIN users_table AS ut ON ut.id = ot.user_id
+              WHERE ot.order_status = 'active' AND ot.user_id = $1;`;
 
       const results = await conn.query(sql, [user_id]);
 
@@ -120,27 +166,24 @@ export class OrdersModel {
     try {
       const conn = await Client.connect();
 
-      const sql =
-        'SELECT \n' +
-        '\tot.id, \n' +
-        '\tot.product_id, \n' +
-        '\tpt.product_name, \n' +
-        '\tpt.price, \n' +
-        '\tot.product_quantity, \n' +
-        '\tpt.product_category, \n' +
-        '\tut.id as user_id,\n' +
-        '\tut.username,\n' +
-        '\tot.order_status \n' +
-        'FROM orders_table AS ot \n' +
-        'INNER JOIN products_table AS pt \n' +
-        'ON pt.id = ot.product_id \n' +
-        'INNER JOIN users_table as ut\n' +
-        'ON ut.id = ot.user_id\n' +
-        '\n' +
-        "WHERE ot.order_status = 'complete' AND ut.id = $1;";
+      const sql = `SELECT
+                ot.id as order_id,
+                pt.product_name,
+                op.product_id,
+                pt.price,
+                op.product_quantity,
+                pt.product_category,
+                ot.user_id,
+                ut.username,
+                ot.order_status
+
+              FROM orders_table AS ot
+              INNER JOIN order_product AS op ON op.order_id = ot.id
+              INNER JOIN products_table AS pt ON pt.id = op.product_id
+              LEFT JOIN users_table AS ut ON ut.id = ot.user_id
+              WHERE ot.order_status = 'complete' AND ot.user_id = $1;`;
 
       const results = await conn.query(sql, [user_id]);
-      console.log(results.rows);
 
       if (results.rows.length === 0) {
         throw new Error();

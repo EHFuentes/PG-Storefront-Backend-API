@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
 import { OrdersModel } from '../models/orders.model';
+import { Request, Response } from 'express';
 
 const model = new OrdersModel();
 
@@ -40,21 +40,44 @@ export class OrdersController {
     }
   }
 
-  async createOrder(req: Request, res: Response) {
-    const { user_id, product_id, product_quantity, order_status } = req.body;
+  async addProductToOrder(req: Request, res: Response) {
+    const order_id = parseInt(req.params.order_id);
+    const product_id = parseInt(req.body.product_id);
+    const product_quantity = parseInt(req.body.product_quantity);
 
     try {
-      if (
-        typeof user_id !== 'number' ||
-        typeof product_id !== 'number' ||
-        typeof product_quantity !== 'number' ||
-        typeof order_status !== 'string'
-      ) {
+      const cart = await model.addProduct(
+        order_id,
+        product_id,
+        product_quantity
+      );
+      res.status(201).json(cart);
+    } catch (err) {
+      res.status(400).json({ error: 'Could not add product to order!', err });
+    }
+  }
+
+  // get products in cart
+  async getProductsInOrder(req: Request, res: Response) {
+    try {
+      const products = await model.getProductsInOrder();
+      res.json(products);
+    } catch (err) {
+      res.status(400);
+      res.json('No orders with products found!');
+    }
+  }
+
+  async createOrder(req: Request, res: Response) {
+    const { user_id, order_status } = req.body;
+
+    try {
+      if (typeof user_id !== 'number' || typeof order_status !== 'string') {
         res.status(400).json('Invalid data type');
         return;
       }
 
-      if (!user_id || !product_id || !product_quantity || !order_status) {
+      if (!user_id || !order_status) {
         res.status(400).json('Missing required fields!');
         return;
       }

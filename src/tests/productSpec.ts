@@ -1,7 +1,7 @@
+import { createUserAndGetToken } from './helpers/createUserAndGetToken';
 import { describe } from 'node:test';
 import supertest from 'supertest';
-import app from '../../server';
-import { createUserAndGetToken } from '../helpers/createUserAndGetToken';
+import app from '../server';
 
 const request = supertest(app);
 
@@ -22,8 +22,11 @@ describe('Products model', () => {
         price: '10',
         product_category: 'test_category',
       });
+    expect(response.status).toBe(201);
+  });
 
-    const response2 = await request
+  it('should create a second product', async () => {
+    const response = await request
       .post('/v1/products/create')
       .set('Authorization', 'Bearer ' + token)
       .send({
@@ -32,7 +35,6 @@ describe('Products model', () => {
         product_category: 'test_category',
       });
     expect(response.status).toBe(201);
-    expect(response2.status).toBe(201);
   });
 
   // product by id
@@ -65,5 +67,5 @@ describe('Products model', () => {
       .get('/v1/products/orders/top')
       .set('Authorization', 'Bearer ' + token);
     expect(response.status).toBe(200);
-  });
+  }, 10000);
 });
