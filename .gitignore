@@ -6,6 +6,7 @@ dist/
 # files
 .env
 package-lock.json
+package.json
 database.json
 .prettierrc
 .eslintrc.js

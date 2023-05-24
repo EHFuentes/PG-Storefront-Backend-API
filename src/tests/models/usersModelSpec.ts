@@ -58,8 +58,6 @@ describe('Users Model', () => {
     const username = userName;
     const password = 'test';
 
-    console.log('username', username);
-
     const user = await usersModel.authenticate(username, password);
 
     expect(user).toBeDefined();
