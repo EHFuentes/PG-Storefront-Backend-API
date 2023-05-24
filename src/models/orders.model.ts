@@ -1,11 +1,12 @@
 import Client from '../services/database';
 
 export type Orders = {
+  id?: number;
+  order_id: number;
+  product_id?: number;
+  product_quantity?: number;
   user_id: number;
   order_status: string;
-  order_id: number;
-  product_id: number;
-  product_quantity: number;
 };
 
 export class OrdersModel {

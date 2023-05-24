@@ -1,8 +1,9 @@
 import Client from '../services/database';
 
 export type Products = {
-  product_name: string;
+  id?: number;
   price: number;
+  product_name: string;
   product_category: string;
 };
 
@@ -26,7 +27,7 @@ export class ProductsModel {
     }
   }
 
-  async show(id: string): Promise<Products[]> {
+  async show(id: string): Promise<Products> {
     try {
       const conn = await Client.connect();
 
@@ -38,7 +39,7 @@ export class ProductsModel {
         throw new Error();
       } else {
         conn.release();
-        return result.rows[0];
+        return result.rows[0]; // This is a single product, not an array
       }
     } catch (err) {
       throw new Error(`Could not find product ${id}. Error: ${err}`);

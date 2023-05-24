@@ -7,7 +7,7 @@ const request = supertest(app);
 
 let token: string;
 
-describe('Products model', () => {
+describe('Products Endpoints', () => {
   beforeAll(async () => {
     token = await createUserAndGetToken();
   });
@@ -18,7 +18,7 @@ describe('Products model', () => {
       .post('/v1/products/create')
       .set('Authorization', 'Bearer ' + token)
       .send({
-        product_name: 'test product',
+        product_name: 'test n',
         price: '10',
         product_category: 'test_category',
       });

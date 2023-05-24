@@ -1,0 +1,11 @@
+# folders
+node_modules/
+.idea/
+dist/
+
+# files
+.env
+package-lock.json
+database.json
+.prettierrc
+.eslintrc.js

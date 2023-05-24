@@ -8,7 +8,7 @@ const request = supertest(app);
 let token: string;
 
 // Test suite for the orders model.
-describe('Orders model', () => {
+describe('Orders Endpoints', () => {
   beforeAll(async () => {
     token = await createUserAndGetToken();
   });

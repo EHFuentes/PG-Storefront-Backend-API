@@ -1,14 +1,13 @@
+import { createUserAndGetToken } from './helpers/createUserAndGetToken';
 import { describe } from 'node:test';
 import supertest from 'supertest';
 import app from '../server';
 
 const request = supertest(app);
 
-import { createUserAndGetToken } from './helpers/createUserAndGetToken';
-
 let token: string;
 
-describe('Orders model', () => {
+describe('Order Endpoints', () => {
   beforeAll(async () => {
     token = await createUserAndGetToken();
   });
@@ -98,7 +97,7 @@ describe('Orders model', () => {
   // add product to order
   let product_Id: number | undefined;
 
-  it('should add product to order', async () => {
+  it('should be able to add a product to active order', async () => {
     // create a product to add to the order
     const response = await request
       .post('/v1/products/create')
@@ -108,6 +107,44 @@ describe('Orders model', () => {
         price: '30',
         product_category: 'test_category',
       });
+    expect(response.status).toBe(201);
+
+    // get all products
+    const response2 = await request
+      .get('/v1/products')
+      .set('Authorization', 'Bearer ' + token);
+    expect(response2.status).toBe(200);
+
+    //  get the id of the last product
+    for (let i = 0; i < response2.body.length; i++) {
+      if (i === response2.body.length - 1) {
+        product_Id = response2.body[i].id;
+      }
+    }
+
+    const response3 = await request
+      .post(`/v1/orders/${Number(lastOrderId)}/products`)
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        product_id: 1,
+        product_quantity: 2,
+      });
+
+    expect(response3.status).toBe(201);
+  }, 7000);
+
+  // add product to complete order to test model
+  it('should be able to a add product to complete order', async () => {
+    // create a product to add to the order
+    const response = await request
+      .post('/v1/products/create')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        product_name: 'add_product_to_order_test_complete',
+        price: '20',
+        product_category: 'test_category',
+      });
+
     expect(response.status).toBe(201);
 
     const response2 = await request
@@ -123,7 +160,7 @@ describe('Orders model', () => {
     }
 
     const response3 = await request
-      .post(`/v1/orders/${Number(lastOrderId)}/products`)
+      .post(`/v1/orders/${Number(lastOrderId - 1)}/products`)
       .set('Authorization', 'Bearer ' + token)
       .send({
         product_id: 1,

@@ -89,7 +89,7 @@ for both the development and test databases. These are used by the Client object
 - POST /v1/orders/create: Create a new order. (Authorization required)
 - POST /v1/orders/:order_id/products: Add product to order. (Authorization required)
 
-- Please note that (Authorization required) means that the request needs to be made with a valid JWT token.
+Please note that (Authorization required) means that the request needs to be made with a valid JWT token.
 
 ## Data Shapes
 The API handles the following data structures:
